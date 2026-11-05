@@ -18,6 +18,11 @@ load_dotenv()
 
 groq_api_key = os.getenv("GROQ_API_KEY")
 USE_GROQ = os.getenv("USE_GROQ", "1").lower() in ("1", "true", "yes")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+try:
+    CHAT_HISTORY_LIMIT = max(1, min(50, int(os.getenv("CHAT_HISTORY_LIMIT", "10"))))
+except (ValueError, TypeError):
+    CHAT_HISTORY_LIMIT = 10
 client = None
 if USE_GROQ:
     if not groq_api_key:
@@ -191,7 +196,7 @@ Respond using markdown headings (##), bullet points, and bold text where appropr
     if chat_sess:
         msgs = ChatMessage.query.filter_by(chat_session_id=chat_sess.id)\
                                 .order_by(ChatMessage.created_at.desc())\
-                                .limit(10).all()
+                                .limit(CHAT_HISTORY_LIMIT).all()
         for m in reversed(msgs):
             history.append({"role": m.role, "content": m.content})
 
@@ -203,8 +208,10 @@ Respond using markdown headings (##), bullet points, and bold text where appropr
     ]
 
     try:
+        if client is None:
+            raise RuntimeError("Groq client is not configured; using offline fallback.")
         completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model=GROQ_MODEL,
             messages=messages,
             temperature=0.6,
             max_tokens=1024
