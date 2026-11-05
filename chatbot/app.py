@@ -225,19 +225,41 @@ Core Clinical Guidelines:
         return reply
     except Exception as e:
         print("Groq error:", e)
-        # Local fallback response when external chat service fails
+        # Local intelligent fallback response when external chat service is unavailable
         advice = stage_info.get(session.get('stage'), '')
+        user_msg_lower = user_message.lower()
+
+        topic_notes = []
+        if any(w in user_msg_lower for w in ("diet", "food", "nutrition", "eat")):
+            topic_notes.append(
+                "**Diet & Nutrition Note:** Research strongly supports the MIND and Mediterranean diets "
+                "(rich in leafy green vegetables, berries, whole grains, nuts, and omega-3 fatty acids) "
+                "in supporting cognitive health."
+            )
+        if any(w in user_msg_lower for w in ("exercise", "fitness", "activity", "lifestyle")):
+            topic_notes.append(
+                "**Physical Activity Note:** Regular aerobic exercise (aiming for 150 min/week) and consistent, "
+                "restful sleep help maintain cerebral blood flow and glymphatic clearance."
+            )
+        if any(w in user_msg_lower for w in ("memory", "brain", "puzzle", "games")):
+            topic_notes.append(
+                "**Cognitive Stimulation Note:** Engaging in structured mental activities, bilingual learning, "
+                "musical practice, and social interaction aids in building cognitive reserve."
+            )
+
+        extra_guidance = "\n\n".join(topic_notes)
+        if extra_guidance:
+            extra_guidance = "\n\n" + extra_guidance
+
         fallback = (
-            "## Assistant\n\n"
-            "**Note:** The external chatbot service is currently unavailable.\n\n"
-            f"**Context:** {stage_context}\n\n"
-            "**Summary:** I can provide general, non-diagnostic guidance based on the MRI stage above.\n\n"
-            f"{advice}\n\n"
-            "**Recommendations:**\n"
-            "- Do not treat this as a medical diagnosis.\n"
-            "- Consult a qualified neurologist for detailed assessment and next steps.\n"
-            "- If symptoms are worsening, seek immediate medical attention.\n\n"
-            "If you'd like, try re-sending your message later or upload a clearer scan."
+            "## Assistant (Offline Guidance)\n\n"
+            "**Note:** Operating in offline clinical guidance mode.\n\n"
+            f"**Scan Context:** {stage_context}\n\n"
+            f"**Clinical Summary:** {advice}{extra_guidance}\n\n"
+            "**Key Recommendations:**\n"
+            "- This information is for educational purposes and is not a medical diagnosis.\n"
+            "- Consult a board-certified neurologist or geriatric specialist for comprehensive cognitive assessment.\n"
+            "- If acute confusion or sudden behavioral changes occur, seek immediate medical evaluation."
         )
         if chat_sess:
             db.session.add(ChatMessage(chat_session_id=chat_sess.id, role='user',      content=user_message))
