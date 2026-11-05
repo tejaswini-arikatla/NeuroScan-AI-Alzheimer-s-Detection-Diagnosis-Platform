@@ -353,8 +353,15 @@
 
     <!-- Scan History -->
     <div class="section-card">
-      <div class="section-header">
+      <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1rem;">
         <div class="section-title"><i class="fas fa-history" style="color:var(--accent);margin-right:8px"></i>Recent Scans</div>
+        <div class="filter-pills" style="display:flex; gap:6px; flex-wrap:wrap;">
+          <a href="/dashboard" class="action-btn {% if not active_stage %}active{% endif %}">All</a>
+          <a href="/dashboard?stage=NonDemented" class="action-btn {% if active_stage == 'NonDemented' %}active{% endif %}">Non Demented</a>
+          <a href="/dashboard?stage=VeryMildDemented" class="action-btn {% if active_stage == 'VeryMildDemented' %}active{% endif %}">Very Mild</a>
+          <a href="/dashboard?stage=MildDemented" class="action-btn {% if active_stage == 'MildDemented' %}active{% endif %}">Mild</a>
+          <a href="/dashboard?stage=ModerateDemented" class="action-btn {% if active_stage == 'ModerateDemented' %}active{% endif %}">Moderate</a>
+        </div>
       </div>
       {% if scans %}
       <table>
