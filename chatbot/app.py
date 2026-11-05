@@ -479,6 +479,22 @@ def serve_upload(filename):
     return redirect(url_for('static', filename='uploads/' + filename), code=301)
 
 # ==============================
+# Global JSON Error Handlers
+# ==============================
+@app.errorhandler(404)
+def not_found_handler(error):
+    if request.is_json or request.path in ('/chat', '/clear_chat') or request.path.startswith('/api/'):
+        return jsonify({'success': False, 'error': 'Resource or endpoint not found.'}), 404
+    return render_template('login.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    if request.is_json or request.path in ('/chat', '/clear_chat') or request.path.startswith('/api/'):
+        return jsonify({'success': False, 'error': 'Internal server error occurred.'}), 500
+    flash('An unexpected error occurred. Please try again.', 'error')
+    return redirect(url_for('index')), 500
+
+# ==============================
 # Run
 # ==============================
 if __name__ == '__main__':
