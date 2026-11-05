@@ -38,8 +38,14 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "neuroscan_secret_2024")
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///neuroscan.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max upload
 
 db = SQLAlchemy(app)
+
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    flash("The uploaded file exceeds the 16 MB size limit.", "error")
+    return redirect(request.referrer or url_for('index'))
 
 # ==============================
 # Database Models
