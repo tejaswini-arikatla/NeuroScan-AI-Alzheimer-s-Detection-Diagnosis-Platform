@@ -161,7 +161,7 @@
     /* Stats cards */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 1rem;
       margin-bottom: 2rem;
     }
@@ -348,6 +348,11 @@
         <div class="stat-label">Moderate</div>
         <div class="stat-value" style="color:#f87171">{{ moderate_count | default(0) }}</div>
         <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg. Confidence</div>
+        <div class="stat-value" style="color:#38bdf8">{{ avg_confidence | default(0.0) }}%</div>
+        <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
       </div>
     </div>
 
