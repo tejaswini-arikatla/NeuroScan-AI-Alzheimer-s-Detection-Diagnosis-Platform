@@ -382,11 +382,14 @@ def download_report():
     all_probs  = session.get('all_probs')
     if not stage or not confidence or not all_probs:
         return 'No prediction found. Please upload a scan first.', 400
-    report_path = 'static/reports/alzheimers_report.pdf'
-    os.makedirs('static/reports', exist_ok=True)
+    report_dir = os.path.join('static', 'reports')
+    os.makedirs(report_dir, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    report_filename = f"report_user_{user.id}_{timestamp}.pdf"
+    report_path = os.path.join(report_dir, report_filename)
     generate_report(stage, confidence, all_probs, report_path)
     return send_file(report_path, as_attachment=True,
-                     download_name='alzheimers_mri_report.pdf',
+                     download_name=f'alzheimers_report_{timestamp}.pdf',
                      mimetype='application/pdf')
 
 @app.route('/download_report/<int:scan_id>')
