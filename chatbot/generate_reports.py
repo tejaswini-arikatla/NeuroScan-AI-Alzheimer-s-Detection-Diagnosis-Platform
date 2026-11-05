@@ -232,7 +232,8 @@ def make_page_decorator(accent_color, total_pages_ref):
 def generate_report(prediction: str,
                     confidence: float,
                     all_probs: dict,
-                    output_path: str) -> str:
+                    output_path: str,
+                    patient_name: str = None) -> str:
 
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
 
@@ -284,14 +285,15 @@ def generate_report(prediction: str,
     W = 7 * inch  # usable width
 
     # ── 1. Report Meta block ───────────────────────────────────────────────────
+    patient_display = patient_name.strip() if patient_name else "Standard Clinical Review"
     meta_data = [[
+        Paragraph(f'<font color="#64748b" size="8">Patient / Subject</font><br/>'
+                  f'<b>{patient_display}</b>', S("md", fontSize=8, textColor=SLATE)),
         Paragraph(f'<font color="#64748b" size="8">Report Date</font><br/>'
                   f'<b>{now}</b>', S("md", fontSize=8, textColor=SLATE)),
         Paragraph(f'<font color="#64748b" size="8">Reference ID</font><br/>'
                   f'<b>NSA-{datetime.now().strftime("%Y%m%d-%H%M%S")}</b>',
                   S("md", fontSize=8, textColor=SLATE)),
-        Paragraph(f'<font color="#64748b" size="8">Model Version</font><br/>'
-                  f'<b>v2.1.0-stable</b>', S("md", fontSize=8, textColor=SLATE)),
     ]]
     meta_tbl = Table(meta_data, colWidths=[W/3]*3)
     meta_tbl.setStyle(TableStyle([
