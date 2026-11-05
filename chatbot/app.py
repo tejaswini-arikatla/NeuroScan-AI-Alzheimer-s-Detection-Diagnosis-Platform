@@ -53,8 +53,8 @@ class User(db.Model):
     email         = db.Column(db.String(120), unique=True, nullable=False)
     password      = db.Column(db.String(200), nullable=False)
     created_at    = db.Column(db.DateTime, default=get_utc_now)
-    scans         = db.relationship('Scan', backref='user', lazy=True)
-    chat_sessions = db.relationship('ChatSession', backref='user', lazy=True)
+    scans         = db.relationship('Scan', backref='user', lazy=True, cascade='all, delete-orphan')
+    chat_sessions = db.relationship('ChatSession', backref='user', lazy=True, cascade='all, delete-orphan')
 
 class Scan(db.Model):
     id          = db.Column(db.Integer, primary_key=True)
@@ -65,13 +65,23 @@ class Scan(db.Model):
     warning     = db.Column(db.String(200))
     created_at  = db.Column(db.DateTime, default=get_utc_now, index=True)
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "prediction": self.prediction,
+            "confidence": self.confidence,
+            "warning": self.warning,
+            "created_at": self.created_at.isoformat() if self.created_at else None
+        }
+
 class ChatSession(db.Model):
     id         = db.Column(db.Integer, primary_key=True)
     user_id    = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
     scan_id    = db.Column(db.Integer, db.ForeignKey('scan.id'), nullable=True, index=True)
     scan_stage = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, default=get_utc_now, index=True)
-    messages   = db.relationship('ChatMessage', backref='chat_session', lazy=True)
+    messages   = db.relationship('ChatMessage', backref='chat_session', lazy=True, cascade='all, delete-orphan')
 
     @property
     def message_count(self):
