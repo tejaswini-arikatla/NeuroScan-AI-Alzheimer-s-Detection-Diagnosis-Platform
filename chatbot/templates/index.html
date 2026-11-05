@@ -160,6 +160,12 @@
     }
     .btn-predict:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(14,165,233,0.3); }
     .btn-predict:active { transform: scale(0.98); }
+    .btn-predict:disabled, .send-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
 
     /* Results */
     .results-section { margin-top: 1.5rem; animation: fadeIn 0.4s ease; }
