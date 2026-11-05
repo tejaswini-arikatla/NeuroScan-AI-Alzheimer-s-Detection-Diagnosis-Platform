@@ -31,8 +31,27 @@ def load_model(model_path, num_classes=4, dropout_prob=0.6, freeze_layers=True, 
 
 
 # =======================
-# Image Preprocessing
+# Image Preprocessing & Validation
 # =======================
+def load_and_validate_image(image_path):
+    """
+    Safely opens and verifies an image file from disk.
+    Ensures file descriptors are cleanly closed and corrupt files raise clear errors.
+    """
+    if not os.path.exists(image_path):
+        raise FileNotFoundError(f"Image not found at path: {image_path}")
+
+    try:
+        with Image.open(image_path) as img:
+            img.verify()
+        with Image.open(image_path) as img:
+            img_converted = img.convert('L')
+            img_converted.load()
+            return img_converted.copy()
+    except Exception as exc:
+        raise ValueError(f"Unable to read or parse MRI image: {exc}") from exc
+
+
 def transform_image(image_path, image_size=None):
     # Use the training image size (default 224) unless overridden
     if image_size is None:
