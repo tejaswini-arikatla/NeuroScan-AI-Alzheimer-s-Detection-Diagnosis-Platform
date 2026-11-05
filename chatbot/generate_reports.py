@@ -242,7 +242,7 @@ def generate_report(prediction: str,
     accent_mid   = stage["accent_mid"]
     now    = datetime.now().strftime("%d %B %Y  ·  %I:%M %p")
 
-    # Inner margins (header + footer consume space)
+    # Inner margins (header + footer consume space) with standard PDF metadata
     doc = SimpleDocTemplate(
         output_path,
         pagesize=letter,
@@ -250,6 +250,10 @@ def generate_report(prediction: str,
         leftMargin=0.75 * inch,
         topMargin=0.75 * inch + 38,    # below header strip
         bottomMargin=0.5 * inch + 28,  # above footer strip
+        title=f"NeuroScan AI Diagnostic Summary - {prediction}",
+        author="NeuroScan AI Clinical Engine",
+        subject="Automated MRI Alzheimer Classification Report",
+        creator="NeuroScan AI Healthcare Platform"
     )
 
     on_page = make_page_decorator(accent, {})
