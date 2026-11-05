@@ -45,7 +45,12 @@ def load_and_validate_image(image_path):
         with Image.open(image_path) as img:
             img.verify()
         with Image.open(image_path) as img:
-            img_converted = img.convert('L')
+            if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+                canvas = Image.new('RGB', img.size, (255, 255, 255))
+                canvas.paste(img, mask=img.convert('RGBA').split()[-1])
+                img_converted = canvas.convert('L')
+            else:
+                img_converted = img.convert('L')
             img_converted.load()
             return img_converted.copy()
     except Exception as exc:
