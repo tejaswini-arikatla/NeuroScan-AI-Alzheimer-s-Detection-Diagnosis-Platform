@@ -58,19 +58,19 @@ class User(db.Model):
 
 class Scan(db.Model):
     id          = db.Column(db.Integer, primary_key=True)
-    user_id     = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id     = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
     prediction  = db.Column(db.String(50), nullable=False)
     confidence  = db.Column(db.Float, nullable=False)
     all_probs   = db.Column(db.Text, nullable=False)
     warning     = db.Column(db.String(200))
-    created_at  = db.Column(db.DateTime, default=get_utc_now)
+    created_at  = db.Column(db.DateTime, default=get_utc_now, index=True)
 
 class ChatSession(db.Model):
     id         = db.Column(db.Integer, primary_key=True)
-    user_id    = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    scan_id    = db.Column(db.Integer, db.ForeignKey('scan.id'), nullable=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+    scan_id    = db.Column(db.Integer, db.ForeignKey('scan.id'), nullable=True, index=True)
     scan_stage = db.Column(db.String(50))
-    created_at = db.Column(db.DateTime, default=get_utc_now)
+    created_at = db.Column(db.DateTime, default=get_utc_now, index=True)
     messages   = db.relationship('ChatMessage', backref='chat_session', lazy=True)
 
     @property
@@ -79,10 +79,10 @@ class ChatSession(db.Model):
 
 class ChatMessage(db.Model):
     id              = db.Column(db.Integer, primary_key=True)
-    chat_session_id = db.Column(db.Integer, db.ForeignKey('chat_session.id'), nullable=False)
+    chat_session_id = db.Column(db.Integer, db.ForeignKey('chat_session.id'), nullable=False, index=True)
     role            = db.Column(db.String(20), nullable=False)
     content         = db.Column(db.Text, nullable=False)
-    created_at      = db.Column(db.DateTime, default=get_utc_now)
+    created_at      = db.Column(db.DateTime, default=get_utc_now, index=True)
 
 # ==============================
 # Auth Helpers
