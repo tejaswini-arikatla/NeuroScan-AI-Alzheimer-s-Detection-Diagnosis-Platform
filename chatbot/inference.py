@@ -69,6 +69,16 @@ def calculate_prediction_entropy(probs_tensor):
     return float(min(max(entropy / max_entropy, 0.0), 1.0))
 
 
+def get_top_predictions(all_probs, top_k=None):
+    """
+    Returns list of (class_name, probability_percentage) sorted by descending likelihood.
+    """
+    sorted_items = sorted(all_probs.items(), key=lambda item: item[1], reverse=True)
+    if top_k is not None:
+        return sorted_items[:top_k]
+    return sorted_items
+
+
 # =======================
 # Prediction
 # =======================
