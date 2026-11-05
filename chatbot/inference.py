@@ -111,3 +111,44 @@ def predict(model, image_tensor, classes, threshold=None):
         predicted_class = "Uncertain"
 
     return predicted_class, confidence, all_probs, warning
+
+
+def predict_detailed(model, image_tensor, classes, threshold=None):
+    """
+    Enhanced prediction returning rich diagnostic metrics including entropy and ranking.
+    """
+    model.eval()
+    device = next(model.parameters()).device
+    image_tensor = image_tensor.to(device)
+
+    if threshold is None:
+        try:
+            threshold = float(os.getenv('PREDICTION_THRESHOLD', '0.3'))
+        except Exception:
+            threshold = 0.3
+
+    with torch.no_grad():
+        outputs = model(image_tensor)
+        probs = torch.softmax(outputs, dim=1)
+        confidence_tensor, pred_idx = torch.max(probs, dim=1)
+        confidence = confidence_tensor.item() * 100
+        predicted_class = classes[pred_idx.item()]
+        all_probs = {classes[i]: float(probs[0, i]) * 100 for i in range(len(classes))}
+        entropy = calculate_prediction_entropy(probs)
+        top_ranked = get_top_predictions(all_probs)
+
+    warning = None
+    if confidence < threshold * 100:
+        warning = "Low confidence prediction. Please consult a neurologist for further evaluation."
+        predicted_class = "Uncertain"
+    elif entropy > 0.85:
+        warning = "High entropy across diagnostic stages. Independent clinical review advised."
+
+    return {
+        "predicted_class": predicted_class,
+        "confidence": confidence,
+        "all_probs": all_probs,
+        "entropy": entropy,
+        "top_ranked": top_ranked,
+        "warning": warning
+    }
