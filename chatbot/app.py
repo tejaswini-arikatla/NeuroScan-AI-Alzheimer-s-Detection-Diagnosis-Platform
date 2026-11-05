@@ -88,6 +88,8 @@ def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if 'user_id' not in session:
+            if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.path in ('/chat', '/clear_chat'):
+                return jsonify({'success': False, 'error': 'Authentication required. Please log in.'}), 401
             flash('Please log in to continue.', 'error')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
