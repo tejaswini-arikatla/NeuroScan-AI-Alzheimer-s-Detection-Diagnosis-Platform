@@ -1,4 +1,5 @@
 import os
+import math
 import torch
 from models.resnet_model import get_resnet2d
 from PIL import Image
@@ -48,6 +49,24 @@ def transform_image(image_path, image_size=None):
 
     return transform(img).unsqueeze(0)
 
+
+
+# =======================
+# Uncertainty & Metrics
+# =======================
+def calculate_prediction_entropy(probs_tensor):
+    """
+    Calculate normalized Shannon entropy for model prediction probabilities.
+    Returns float in [0.0, 1.0] where 0.0 represents complete certainty
+    and 1.0 represents uniform uncertainty across all classes.
+    """
+    eps = 1e-12
+    num_classes = probs_tensor.size(-1)
+    if num_classes <= 1:
+        return 0.0
+    entropy = -torch.sum(probs_tensor * torch.log2(probs_tensor + eps), dim=-1).item()
+    max_entropy = math.log2(num_classes)
+    return float(min(max(entropy / max_entropy, 0.0), 1.0))
 
 
 # =======================
