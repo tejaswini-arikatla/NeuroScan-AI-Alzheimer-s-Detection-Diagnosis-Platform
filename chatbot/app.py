@@ -1,6 +1,9 @@
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timezone
+
+def get_utc_now():
+    return datetime.now(timezone.utc)
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file, flash
 from PIL import Image
@@ -49,7 +52,7 @@ class User(db.Model):
     name          = db.Column(db.String(100), nullable=False)
     email         = db.Column(db.String(120), unique=True, nullable=False)
     password      = db.Column(db.String(200), nullable=False)
-    created_at    = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at    = db.Column(db.DateTime, default=get_utc_now)
     scans         = db.relationship('Scan', backref='user', lazy=True)
     chat_sessions = db.relationship('ChatSession', backref='user', lazy=True)
 
@@ -60,14 +63,14 @@ class Scan(db.Model):
     confidence  = db.Column(db.Float, nullable=False)
     all_probs   = db.Column(db.Text, nullable=False)
     warning     = db.Column(db.String(200))
-    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at  = db.Column(db.DateTime, default=get_utc_now)
 
 class ChatSession(db.Model):
     id         = db.Column(db.Integer, primary_key=True)
     user_id    = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     scan_id    = db.Column(db.Integer, db.ForeignKey('scan.id'), nullable=True)
     scan_stage = db.Column(db.String(50))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=get_utc_now)
     messages   = db.relationship('ChatMessage', backref='chat_session', lazy=True)
 
     @property
@@ -79,7 +82,7 @@ class ChatMessage(db.Model):
     chat_session_id = db.Column(db.Integer, db.ForeignKey('chat_session.id'), nullable=False)
     role            = db.Column(db.String(20), nullable=False)
     content         = db.Column(db.Text, nullable=False)
-    created_at      = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at      = db.Column(db.DateTime, default=get_utc_now)
 
 # ==============================
 # Auth Helpers
