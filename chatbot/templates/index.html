@@ -461,8 +461,8 @@
             <div class="upload-text">Drop MRI scan here or <strong>browse</strong></div>
             <div class="selected-file" id="file-name"></div>
           </div>
-          <button type="submit" class="btn-predict">
-            <i class="fas fa-search"></i> Analyse Scan
+          <button type="submit" class="btn-predict" id="btn-predict">
+            <i class="fas fa-search" id="btn-predict-icon"></i> <span id="btn-predict-text">Analyse Scan</span>
           </button>
         </form>
 
@@ -610,6 +610,21 @@
   </main>
 
   <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const uploadForm = document.getElementById('upload-form');
+      if (uploadForm) {
+        uploadForm.addEventListener('submit', function() {
+          const btn = document.getElementById('btn-predict');
+          if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Analyzing Scan...';
+            btn.style.opacity = '0.75';
+            btn.style.cursor = 'not-allowed';
+          }
+        });
+      }
+    });
+
     function sendMessage() {
       const input = document.getElementById('chat-input');
       const msg = input.value.trim();
