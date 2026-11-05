@@ -387,10 +387,14 @@ def download_report():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     report_filename = f"report_user_{user.id}_{timestamp}.pdf"
     report_path = os.path.join(report_dir, report_filename)
-    generate_report(stage, confidence, all_probs, report_path)
-    return send_file(report_path, as_attachment=True,
-                     download_name=f'alzheimers_report_{timestamp}.pdf',
-                     mimetype='application/pdf')
+    try:
+        generate_report(stage, confidence, all_probs, report_path)
+        return send_file(report_path, as_attachment=True,
+                         download_name=f'alzheimers_report_{timestamp}.pdf',
+                         mimetype='application/pdf')
+    except Exception as exc:
+        flash(f"Report generation error: {exc}", "error")
+        return redirect(url_for('index'))
 
 @app.route('/download_report/<int:scan_id>')
 @login_required
@@ -399,13 +403,18 @@ def download_report_by_id(scan_id):
     scan = Scan.query.get_or_404(scan_id)
     if scan.user_id != user.id:
         return 'Unauthorized', 403
-    all_probs   = json.loads(scan.all_probs)
-    report_path = f'static/reports/report_{scan_id}.pdf'
-    os.makedirs('static/reports', exist_ok=True)
-    generate_report(scan.prediction, scan.confidence, all_probs, report_path)
-    return send_file(report_path, as_attachment=True,
-                     download_name=f'alzheimers_report_{scan_id}.pdf',
-                     mimetype='application/pdf')
+    try:
+        all_probs   = json.loads(scan.all_probs)
+        report_dir  = os.path.join('static', 'reports')
+        os.makedirs(report_dir, exist_ok=True)
+        report_path = os.path.join(report_dir, f'report_{scan_id}.pdf')
+        generate_report(scan.prediction, scan.confidence, all_probs, report_path)
+        return send_file(report_path, as_attachment=True,
+                         download_name=f'alzheimers_report_{scan_id}.pdf',
+                         mimetype='application/pdf')
+    except Exception as exc:
+        flash(f"Failed to generate report for scan #{scan_id}: {exc}", "error")
+        return redirect(url_for('reports'))
 
 # ==============================
 # Routes — Reports
