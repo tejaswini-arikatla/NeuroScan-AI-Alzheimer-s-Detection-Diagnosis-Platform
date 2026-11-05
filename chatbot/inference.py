@@ -58,11 +58,17 @@ def load_and_validate_image(image_path):
 
 
 def transform_image(image_path, image_size=None):
-    # Use the training image size (default 224) unless overridden
+    """
+    Load, validate, and transform MRI image for ResNet inference.
+    Normalizes grayscale tensor to [-1.0, 1.0].
+    """
     if image_size is None:
-        image_size = int(os.getenv('IMAGE_SIZE', '224'))
+        try:
+            image_size = int(os.getenv('IMAGE_SIZE', '224'))
+        except (ValueError, TypeError):
+            image_size = 224
 
-    img = Image.open(image_path).convert('L')  # grayscale only, no RGB conversion
+    img = load_and_validate_image(image_path)
 
     transform = transforms.Compose([
         transforms.Resize((image_size, image_size)),
